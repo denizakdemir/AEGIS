@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "AEGIS: Adaptive Experiment-Gap Inference System"
+version: 0.1.0
+date-released: "2026-02-16"
+url: "https://github.com/denizakdemir/AEGIS"
+license: MIT
+authors:
+  - family-names: Akdemir
+    given-names: Deniz
+    email: deniz.akdemir.work@gmail.com
+    orcid: "https://orcid.org/0000-0003-0553-6798"
+keywords:
+  - causal inference
+  - monitoring
+  - Le Cam deficiency
+  - deployment safety
+  - ML ops
+references:
+  - type: article
+    title: "Constraints on Causal Inference as Experiment Comparison: A Framework for Identification, Transportability, and Policy Learning"
+    authors:
+      - family-names: Akdemir
+        given-names: Deniz
+        orcid: "https://orcid.org/0000-0003-0553-6798"
+    year: 2026
+    doi: "10.5281/zenodo.18601223"
+    url: "https://doi.org/10.5281/zenodo.18601223"

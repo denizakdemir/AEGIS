@@ -14,7 +14,7 @@ authors:
 keywords:
   - causal inference
   - monitoring
-  - Le Cam deficiency
+  - experiment deficiency
   - deployment safety
   - ML ops
 references:
@@ -25,5 +25,5 @@ references:
         given-names: Deniz
         orcid: "https://orcid.org/0000-0003-0553-6798"
     year: 2026
-    doi: "10.5281/zenodo.18601223"
-    url: "https://doi.org/10.5281/zenodo.18601223"
+    doi: "10.5281/zenodo.21877511"
+    url: "https://doi.org/10.5281/zenodo.21877511"

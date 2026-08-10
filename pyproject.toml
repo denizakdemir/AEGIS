@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "aegis-causal-monitor"
 version = "0.1.0"
-description = "Fast causal gap monitoring proxies aligned with Le Cam deficiency theory."
+description = "Fast causal gap monitoring proxies aligned with experiment deficiency theory."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -13,7 +13,7 @@ authors = [{ name = "Deniz Akdemir", email = "deniz.akdemir.work@gmail.com" }]
 keywords = [
   "causal-inference",
   "monitoring",
-  "le-cam-deficiency",
+  "experiment-deficiency",
   "safety",
   "ml-ops",
 ]

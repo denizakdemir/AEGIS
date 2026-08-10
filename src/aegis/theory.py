@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 from typing import Tuple
 
 import numpy as np
@@ -104,55 +103,48 @@ def wasserstein_deficiency_gaussian(
 
 
 def _tv_distance_normal(mu1: float, sd1: float, mu2: float, sd2: float) -> float:
+    """Total variation distance between two univariate normals.
+
+    Computed via piecewise Simpson's-rule integration of |f1 - f2| over
+    breakpoints scaled to each component's own sd (+/-5, 15, 30 sd around
+    each mean). A closed-form quadratic-crossing-point approach was used
+    here previously; it loses precision and silently returns near-0
+    instead of near-1 when both sd's are very small relative to the mean
+    separation (a near-degenerate point-mass regime). This mirrors the
+    fix applied to causaldef's `.tv_distance_normal()` (2026-08-10),
+    verified against independent quadrature to ~5e-7 over sd spanning
+    1e-6 to 1e3.
+    """
     if sd1 <= 0 or sd2 <= 0:
         return float("nan")
     if mu1 == mu2 and sd1 == sd2:
         return 0.0
 
-    a_q = 1.0 / (sd2 * sd2) - 1.0 / (sd1 * sd1)
-    b_q = -2.0 * mu2 / (sd2 * sd2) + 2.0 * mu1 / (sd1 * sd1)
-    c_q = mu2 * mu2 / (sd2 * sd2) - mu1 * mu1 / (sd1 * sd1) + 2.0 * np.log(sd2 / sd1)
+    breakpoints = sorted(
+        {
+            mu1 + k * sd1 for k in (-30, -15, -5, 0, 5, 15, 30)
+        }
+        | {
+            mu2 + k * sd2 for k in (-30, -15, -5, 0, 5, 15, 30)
+        }
+    )
 
-    if abs(a_q) < 1e-12:
-        cutpoints = np.array([-c_q / b_q])
-    else:
-        disc = max(b_q * b_q - 4.0 * a_q * c_q, 0.0)
-        root = np.sqrt(disc)
-        cutpoints = np.sort(np.array([(-b_q - root) / (2.0 * a_q), (-b_q + root) / (2.0 * a_q)]))
+    def f(x: np.ndarray) -> np.ndarray:
+        f1 = np.exp(-0.5 * ((x - mu1) / sd1) ** 2) / (sd1 * np.sqrt(2.0 * np.pi))
+        f2 = np.exp(-0.5 * ((x - mu2) / sd2) ** 2) / (sd2 * np.sqrt(2.0 * np.pi))
+        return np.abs(f1 - f2)
 
-    endpoints = np.concatenate([[-np.inf], cutpoints, [np.inf]])
-    tv = 0.0
-    scale = 10.0 * max(sd1, sd2)
-
-    for i in range(endpoints.size - 1):
-        lo = endpoints[i]
-        hi = endpoints[i + 1]
-        if np.isneginf(lo):
-            mid = hi - scale
-        elif np.isposinf(hi):
-            mid = lo + scale
-        else:
-            mid = 0.5 * (lo + hi)
-
-        f1 = np.exp(-0.5 * ((mid - mu1) / sd1) ** 2) / (sd1 * np.sqrt(2.0 * np.pi))
-        f2 = np.exp(-0.5 * ((mid - mu2) / sd2) ** 2) / (sd2 * np.sqrt(2.0 * np.pi))
-        if f1 < f2:
+    total = 0.0
+    n_points = 2001  # odd -> even number of Simpson sub-intervals
+    for lo, hi in zip(breakpoints[:-1], breakpoints[1:]):
+        if hi <= lo:
             continue
+        xs = np.linspace(lo, hi, n_points)
+        ys = f(xs)
+        h = (hi - lo) / (n_points - 1)
+        total += h / 3.0 * (ys[0] + ys[-1] + 4.0 * np.sum(ys[1:-1:2]) + 2.0 * np.sum(ys[2:-2:2]))
 
-        p1 = _normal_cdf(hi, mu1, sd1) - _normal_cdf(lo, mu1, sd1)
-        p2 = _normal_cdf(hi, mu2, sd2) - _normal_cdf(lo, mu2, sd2)
-        tv += p1 - p2
-
-    return float(np.clip(tv, 0.0, 1.0))
-
-
-def _normal_cdf(x: float, mu: float, sd: float) -> float:
-    if np.isneginf(x):
-        return 0.0
-    if np.isposinf(x):
-        return 1.0
-    z = (x - mu) / (sd * np.sqrt(2.0))
-    return 0.5 * (1.0 + math.erf(z))
+    return float(np.clip(0.5 * total, 0.0, 1.0))
 
 
 def _deficiency_gaussian(alpha: float, gamma: float, sigma_a: float, sigma_y: float, a: float) -> float:

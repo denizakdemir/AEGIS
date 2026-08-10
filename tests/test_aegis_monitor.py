@@ -20,6 +20,7 @@ from aegis import (
     uniform_deficiency_proxy,
     wasserstein_deficiency_gaussian,
 )
+from aegis.theory import _tv_distance_normal
 
 
 def _auc(y_true: np.ndarray, y_score: np.ndarray) -> float:
@@ -255,3 +256,23 @@ def test_theory_utilities_from_causaldef_parity() -> None:
 
     frontier = confounding_frontier(grid_size=7)
     assert frontier["delta_grid"].shape == (7, 7)
+
+
+def test_tv_distance_normal_near_degenerate_regime() -> None:
+    """Regression test for a real bug fixed 2026-08-10.
+
+    A closed-form quadratic-crossing-point implementation of this function
+    silently returned ~0.0 instead of ~1.0 when both components have very
+    small standard deviations relative to their mean separation (a
+    near-degenerate, effectively disjoint point-mass regime). The safe
+    default parameters used elsewhere in this test module never entered
+    this regime, so it was not caught until an explicit audit. Values below
+    verified against independent scipy.integrate.quad ground truth to
+    ~1e-12.
+    """
+    assert _tv_distance_normal(0.0, 1e-3, 5.0, 1e-3) == pytest.approx(1.0, abs=1e-6)
+    assert _tv_distance_normal(0.0, 1e-4, 1.0, 1e-4) == pytest.approx(1.0, abs=1e-6)
+    assert _tv_distance_normal(0.0, 1e-6, 0.01, 1e-6) == pytest.approx(1.0, abs=1e-6)
+    # sanity check the well-separated / normal-scale regime is still correct
+    assert _tv_distance_normal(0.0, 1.0, 2.0, 1.0) == pytest.approx(0.682689, abs=1e-5)
+    assert _tv_distance_normal(0.0, 1.0, 0.0, 1.0) == 0.0

@@ -15,7 +15,7 @@ This folder contains runnable reference scripts for the manuscript case studies.
 - Source: `folktables` Python package.
 - Action `A`: simulated policy decision from a classifier.
 - Outcome `Y`: income threshold.
-- Negative control: pre-decision covariates (diagnostic only).
+- Negative control: pre-decision covariates (screening diagnostic only).
 - Script: `folktables_case.py`
 
 ### 3) Amazon Multi-Domain Sentiment (optional)
@@ -36,6 +36,8 @@ Each script emits:
 - Manuscript-ready table artifacts:
   - `real_data_proxy_table.csv`
   - `real_data_proxy_table.md`
+
+These outputs are proxy diagnostics and uncertainty summaries. They should be read as evidence about residual observational-to-interventional gap, not as stand-alone validation of causal identification.
 
 ## Dependencies
 

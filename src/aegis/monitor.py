@@ -255,7 +255,14 @@ def negative_control_tv(
 
 @dataclass
 class AEGISMonitor:
-    """Streaming monitor with optional threshold-based gating."""
+    """Streaming monitor with optional threshold-based gating.
+
+    The returned statuses are operational routing decisions:
+    ``allow`` means the configured proxy thresholds were not exceeded in the
+    current window, ``review`` means manual inspection is recommended, and
+    ``abstain`` means the configured gating rule blocks autonomous use.
+    These statuses do not certify identification or absence of confounding.
+    """
 
     window_size: int = 5000
     bins: int = 50
@@ -310,7 +317,7 @@ class AEGISMonitor:
         kappa: Optional[float] = None,
         missing_nc_status: Optional[str] = None,
     ) -> None:
-        """Set or update gating thresholds."""
+        """Set or update gating thresholds for operational routing."""
         self.delta_propensity_max = _validate_threshold(
             delta_propensity_max,
             name="delta_propensity_max",
@@ -418,7 +425,11 @@ class AEGISMonitor:
         return results
 
     def assess(self, *, record: bool = True) -> Dict[str, object]:
-        """Return threshold-based status suitable for gating/abstention decisions."""
+        """Return a threshold-based routing status for gating or abstention.
+
+        The result should be interpreted as an operational policy based on
+        user-chosen proxy thresholds, not as a proof that deployment is safe.
+        """
         metrics = self.estimate()
         status = "allow"
         reasons = []
@@ -458,4 +469,3 @@ class AEGISMonitor:
         """Clear decision history."""
         self._decision_log.clear()
         self._decision_seq = 0
-

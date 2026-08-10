@@ -11,7 +11,7 @@
 
 - **Propensity-overlap proxy** — binary-action overlap diagnostic with metric choices `tv`, `w1`, or `mmd`.
 - **Negative-control proxy** — IPTW negative-control discrepancy with configurable distance metrics.
-- **Sensitivity bounds** — `kappa * delta_nc` upper bound for observable sensitivity.
+- **Sensitivity bounds** — `kappa * delta_nc` upper bound for an observable residual-bias budget.
 - **Policy transfer bounds** — regret upper bounds, minimax floors, and VC-augmented policy bounds.
 - **Streaming monitor** — `AEGISMonitor` with fixed-window updates, threshold-based gating, and decision logs.
 - **Theory-aligned utilities** — overlap diagnostics, confounding frontier, partial identification sets, sharp lower bounds, and more.
@@ -65,6 +65,8 @@ print(metrics)
 print(decision["status"], decision["reasons"])
 ```
 
+`allow`, `review`, and `abstain` are operational gating states, not identification certificates. In particular, `allow` means the monitored proxies did not exceed the configured thresholds in the current window; it does not prove that confounding is absent.
+
 ## Core API
 
 | Function / Class | Description |
@@ -113,6 +115,8 @@ Generate validation plots:
 ```bash
 python validation/generate_plots.py --out-dir validation/out
 ```
+
+The synthetic validation suite is designed to check whether the monitor separates lower-risk from higher-risk simulated regimes under the chosen thresholds. It is not a proof that any threshold choice is universally correct.
 
 ## Repository Structure
 

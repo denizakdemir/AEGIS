@@ -29,12 +29,11 @@ def main() -> int:
     gating = summary["gating_performance"]
     print(f"[OK] Wrote synthetic validation outputs to {args.out_dir}")
     print(
-        f"[OK] safe_allow_rate={gating['safe_allow_rate']:.3f}, "
-        f"risky_abstain_rate={gating['risky_abstain_rate']:.3f}"
+        f"[OK] low_risk_allow_rate={gating['safe_allow_rate']:.3f}, "
+        f"high_risk_abstain_rate={gating['risky_abstain_rate']:.3f}"
     )
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

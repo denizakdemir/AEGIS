@@ -234,8 +234,8 @@ def run_validation(
         "# AEGIS Synthetic Validation Report",
         "",
         "## Gating performance",
-        f"- Safe allow rate: {gating['safe_allow_rate']:.3f}",
-        f"- Risky abstain rate: {gating['risky_abstain_rate']:.3f}",
+        f"- Low-risk allow rate: {gating['safe_allow_rate']:.3f}",
+        f"- High-risk abstain rate: {gating['risky_abstain_rate']:.3f}",
         "",
         "## Overlap curve means",
     ]
@@ -248,7 +248,7 @@ def run_validation(
     report.extend([f"- strength={p.strength:.1f}: {p.mean:.3f} +/- {p.std:.3f}" for p in uniform])
     report.append("")
     report.append(
-        "These are proxy diagnostics under synthetic SCM-inspired simulations, not population-identification proofs."
+        "These are proxy diagnostics under synthetic SCM-inspired simulations, not population-identification proofs or universal threshold guarantees."
     )
     (out_dir / "report.md").write_text("\n".join(report), encoding="utf-8")
 

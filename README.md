@@ -3,7 +3,7 @@
 [![CI](https://github.com/denizakdemir/AEGIS/actions/workflows/ci.yml/badge.svg)](https://github.com/denizakdemir/AEGIS/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21877511.svg)](https://doi.org/10.5281/zenodo.21877511)
+[![Paper](https://img.shields.io/badge/paper-zenodo.21877511-blue.svg)](https://doi.org/10.5281/zenodo.21877511)
 
 **AEGIS** is a lightweight Python package for monitoring the observational–interventional gap in deployed ML systems. It provides fast, streaming proxies of causal deficiency grounded in the theory of statistical experiment comparison — enabling pre-deployment audits, runtime monitoring, and per-decision gating with minimal dependencies.
 

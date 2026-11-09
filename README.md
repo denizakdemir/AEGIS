@@ -3,7 +3,7 @@
 [![CI](https://github.com/denizakdemir/AEGIS/actions/workflows/ci.yml/badge.svg)](https://github.com/denizakdemir/AEGIS/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Paper](https://img.shields.io/badge/paper-zenodo.21877511-blue.svg)](https://doi.org/10.5281/zenodo.21877511)
+[![Paper](https://img.shields.io/badge/paper-zenodo.18367346-blue.svg)](https://doi.org/10.5281/zenodo.18367346)
 
 **AEGIS** is a lightweight Python package for monitoring the observational–interventional gap in deployed ML systems. It provides fast, streaming proxies of causal deficiency grounded in the theory of statistical experiment comparison — enabling pre-deployment audits, runtime monitoring, and per-decision gating with minimal dependencies.
 
@@ -76,8 +76,8 @@ print(decision["status"], decision["reasons"])
 | `uniform_deficiency_proxy(...)` | One-vs-rest uniform proxy over discrete action sets |
 | `negative_control_distance(...)` | IPTW negative-control discrepancy (`tv` / `w1` / `mmd`) |
 | `negative_control_sensitivity_bound(...)` | Compute `kappa * delta_nc` |
-| `policy_regret_upper_bound(...)` | Regret ≤ Regret_obs + M × δ_uniform |
-| `policy_regret_minimax_floor(...)` | 0.5 × M × δ_uniform |
+| `policy_regret_upper_bound(...)` | Regret ≤ Regret_sim + 2·\|A\|·M·δ (4·M·δ for binary covariate policies; 2·M·δ for fixed actions) |
+| `policy_regret_minimax_floor(...)` | 0.25 × M × δ_uniform (sharp) |
 | `overlap_diagnostic(...)` | ESS and extremes-based overlap diagnostic |
 | `confounding_frontier(...)` | Confounding frontier utility |
 | `sharp_lower_bound(...)` | Sharp two-point lower bound |
@@ -152,7 +152,7 @@ Contributions are welcome! Please open an issue or submit a pull request.
 
 If you use AEGIS in your research, please cite the underlying theory paper:
 
-> Akdemir, D. (2026). *Constraints on Causal Inference as Experiment Comparison: A Framework for Identification, Transportability, and Policy Learning.* Zenodo. [https://doi.org/10.5281/zenodo.21877511](https://doi.org/10.5281/zenodo.21877511)
+> Akdemir, D. (2026). *Constraints on Causal Inference as Experiment Comparison: A Framework for Identification, Transportability, and Policy Learning.* Zenodo. [https://doi.org/10.5281/zenodo.18367346](https://doi.org/10.5281/zenodo.18367346)
 
 BibTeX:
 
@@ -163,8 +163,8 @@ BibTeX:
              Policy Learning},
   author  = {Akdemir, Deniz},
   year    = {2026},
-  doi     = {10.5281/zenodo.21877511},
-  url     = {https://doi.org/10.5281/zenodo.21877511},
+  doi     = {10.5281/zenodo.18367346},
+  url     = {https://doi.org/10.5281/zenodo.18367346},
   publisher = {Zenodo}
 }
 ```

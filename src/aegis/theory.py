@@ -15,8 +15,16 @@ def rkhs_rate_bound(
     d_w: int,
     eta: float,
     xi: float = 0.05,
+    d_y: int = 0,
 ) -> float:
-    """Finite-sample RKHS rate bound surrogate."""
+    """Order-of-magnitude rate (n * eta) ** (-beta / (2 * beta + d_w + d_y)).
+
+    Rate of the TV estimation error of the back-door plug-in interventional law,
+    up to constants and log factors (manuscript remark on nonparametric rates).
+    ``d_y = 0`` for finite outcome spaces. ``xi`` is unused (kept for
+    compatibility); versions up to 0.1.0 returned
+    ``n ** (-beta / (2 beta + d_w)) + sqrt(log(1/xi)/n) / eta``.
+    """
     n = int(n)
     d_w = int(d_w)
     beta = float(beta)
@@ -35,7 +43,10 @@ def rkhs_rate_bound(
     if xi >= 1:
         raise ValueError("xi must be in (0, 1).")
 
-    return float(n ** (-beta / (2.0 * beta + d_w)) + (1.0 / eta) * np.sqrt(np.log(1.0 / xi) / n))
+    d_y = int(d_y)
+    if d_y < 0:
+        raise ValueError("d_y must be non-negative.")
+    return float((n * eta) ** (-beta / (2.0 * beta + d_w + d_y)))
 
 
 def policy_regret_vc_bound(
@@ -46,8 +57,24 @@ def policy_regret_vc_bound(
     utility_range: Tuple[float, float] = (0.0, 1.0),
     xi: float = 0.05,
     c: float = 2.0,
+    eta: float | None = None,
 ) -> dict:
-    """Policy regret upper bound with VC complexity term."""
+    """Finite-sample regret bound for IPW empirical welfare maximization.
+
+    Binary treatment, known propensity in ``[eta, 1 - eta]`` (manuscript,
+    Finite-Sample Policy Regret Transfer theorem)::
+
+        regret <= 4 M delta + c (M / eta) (sqrt(v / n) + sqrt(log(1 / xi) / n))
+
+    ``eta`` is required. ``regret_observational`` is ignored (the bound applies to
+    the empirical welfare maximizer) and kept only for signature compatibility.
+    Versions up to 0.1.0 used ``M delta + c M sqrt((v log n + log(1/xi)) / n)``.
+    """
+    if eta is None:
+        raise ValueError("eta (overlap constant of the known propensity) is required.")
+    eta = float(eta)
+    if not 0.0 <= eta <= 0.5:
+        raise ValueError("eta must be in [0, 0.5].")
     regret_observational = float(regret_observational)
     delta_uniform = float(delta_uniform)
     vc_dim = float(vc_dim)
@@ -71,10 +98,13 @@ def policy_regret_vc_bound(
         raise ValueError("utility_range must satisfy max >= min.")
     m = hi - lo
 
-    transfer_penalty = m * delta_uniform
-    complexity_penalty = c * m * np.sqrt((vc_dim * np.log(n) + np.log(1.0 / xi)) / n)
+    transfer_penalty = 4.0 * m * delta_uniform
+    if eta == 0.0:
+        complexity_penalty = float("inf")
+    else:
+        complexity_penalty = c * (m / eta) * (np.sqrt(vc_dim / n) + np.sqrt(np.log(1.0 / xi) / n))
     return {
-        "regret_upper_bound": regret_observational + transfer_penalty + complexity_penalty,
+        "regret_upper_bound": transfer_penalty + complexity_penalty,
         "transfer_penalty": transfer_penalty,
         "complexity_penalty": float(complexity_penalty),
         "delta_uniform": delta_uniform,

@@ -168,8 +168,16 @@ def test_uniform_deficiency_proxy_multiaction() -> None:
 
 def test_negative_control_bound_and_policy_bounds() -> None:
     assert negative_control_sensitivity_bound(0.2, kappa=1.5) == pytest.approx(0.3)
-    assert policy_regret_upper_bound(0.1, 0.2, utility_range=(0.0, 2.0)) == pytest.approx(0.5)
-    assert policy_regret_minimax_floor(0.2, utility_range=(0.0, 2.0)) == pytest.approx(0.2)
+    # Policy Regret Transfer: simulated regret + 2 * |A| * M * delta (binary: 4 M delta)
+    assert policy_regret_upper_bound(0.1, 0.2, utility_range=(0.0, 2.0)) == pytest.approx(0.1 + 4 * 2.0 * 0.2)
+    assert policy_regret_upper_bound(
+        0.1, 0.2, utility_range=(0.0, 2.0), policy_type="constant"
+    ) == pytest.approx(0.1 + 2 * 2.0 * 0.2)
+    assert policy_regret_upper_bound(0.0, 0.1, n_actions=3) == pytest.approx(0.6)
+    with pytest.raises(ValueError):
+        policy_regret_upper_bound(0.0, 0.1, n_actions=1)
+    # Minimax Safety Floor: (M/4) delta, sharp
+    assert policy_regret_minimax_floor(0.2, utility_range=(0.0, 2.0)) == pytest.approx(0.1)
 
 
 def test_assess_thresholds_and_decision_log() -> None:
@@ -232,7 +240,8 @@ def test_monitor_with_w1_and_mmd_metrics() -> None:
 
 
 def test_theory_utilities_from_causaldef_parity() -> None:
-    assert rkhs_rate_bound(n=1000, beta=1.0, d_w=3, eta=0.2, xi=0.05) > 0
+    assert rkhs_rate_bound(n=1000, beta=1.0, d_w=3, eta=0.2, xi=0.05) == pytest.approx((1000 * 0.2) ** (-1.0 / 5.0))
+    assert rkhs_rate_bound(n=1000, beta=1.0, d_w=3, eta=0.2, d_y=1) == pytest.approx((1000 * 0.2) ** (-1.0 / 6.0))
     assert wasserstein_deficiency_gaussian(alpha=1.0, gamma=0.5, sigma_a=1.0, a=1.0) > 0
     sharp = sharp_lower_bound(alpha=0.8, gamma=0.7, metric="tv")
     assert sharp["lower"] >= 0
@@ -245,8 +254,14 @@ def test_theory_utilities_from_causaldef_parity() -> None:
         vc_dim=5,
         n=1000,
         utility_range=(0.0, 1.0),
+        eta=0.2,
     )
-    assert vc["regret_upper_bound"] > vc["transfer_penalty"]
+    assert vc["transfer_penalty"] == pytest.approx(4 * 0.2)
+    expected_cp = 2.0 * (1.0 / 0.2) * (np.sqrt(5 / 1000) + np.sqrt(np.log(1 / 0.05) / 1000))
+    assert vc["complexity_penalty"] == pytest.approx(expected_cp)
+    assert vc["regret_upper_bound"] == pytest.approx(vc["transfer_penalty"] + vc["complexity_penalty"])
+    with pytest.raises(ValueError):
+        policy_regret_vc_bound(regret_observational=0.0, delta_uniform=0.2, vc_dim=5, n=1000)
 
     rng = np.random.default_rng(44)
     x = rng.normal(size=(800, 2))
